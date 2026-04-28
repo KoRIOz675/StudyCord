@@ -6,6 +6,7 @@ StudyCord is a discord-inspired plateform designed for school collaboration.
 
 ## Project Structure
 
+```
 studycord/
 ├── src/main/java/com/studycord/
 │   │
@@ -46,3 +47,4 @@ studycord/
 │
 └── src/main/resources/
     └── application.properties
+```
