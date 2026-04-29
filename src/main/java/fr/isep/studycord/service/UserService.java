@@ -30,7 +30,11 @@ public class UserService {
      * @return the saved {@link User} with its generated ID
      */
     public User createUser(UserDTO dto) {
-        User user = new User(null, dto.getUsername(), dto.getEmail(), dto.getRole(), dto.getSchool(), null);
+        User user = new User();
+        user.setUsername(dto.getUsername());
+        user.setEmail(dto.getEmail());
+        user.setRole(dto.getRole());
+        user.setSchool(dto.getSchool());
         return userRepository.save(user);
     }
 

@@ -1,5 +1,6 @@
 package fr.isep.studycord.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.neo4j.core.schema.GeneratedValue;
@@ -52,5 +53,5 @@ public class Server {
      * {@code HAS_CHANNEL} relationships.
      */
     @Relationship(type = "HAS_CHANNEL", direction = OUTGOING)
-    private List<Channel> channels;
+    private List<Channel> channels = new ArrayList<>();
 }

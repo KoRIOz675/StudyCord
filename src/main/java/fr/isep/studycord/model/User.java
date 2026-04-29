@@ -1,5 +1,6 @@
 package fr.isep.studycord.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.neo4j.core.schema.GeneratedValue;
@@ -56,6 +57,6 @@ public class User {
      * relationships.
      */
     @Relationship(type = "MEMBER_OF", direction = OUTGOING)
-    private List<Server> servers;
+    private List<Server> servers = new ArrayList<>();
 
 }

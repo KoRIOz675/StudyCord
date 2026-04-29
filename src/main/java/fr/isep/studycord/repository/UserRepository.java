@@ -33,6 +33,8 @@ public interface UserRepository extends Neo4jRepository<User, Long> {
      * @param server the server whose members should be retrieved
      * @return a list of members (never {@code null})
      */
-    @Query("MATCH (u:User)-[:MEMBER_OF]->(s:Server) WHERE id(s) = $serverId RETURN u")
+    @Query("MATCH (u:User)-[r:MEMBER_OF]->(s:Server) WHERE id(s) = $serverId "
+            + "MATCH (u)-[r2:MEMBER_OF]->(s2:Server) "
+            + "RETURN u, collect(r2), collect(s2)")
     List<User> findByServerId(Long serverId);
 }
