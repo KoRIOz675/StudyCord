@@ -1,15 +1,21 @@
 package fr.isep.studycord.service;
 
-import fr.isep.studycord.dto.UserDTO;
-import fr.isep.studycord.model.User;
-import fr.isep.studycord.model.Server;
-import fr.isep.studycord.repository.UserRepository;
-import fr.isep.studycord.repository.ServerRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 
+import org.springframework.stereotype.Service;
+
+import fr.isep.studycord.dto.UserDTO;
+import fr.isep.studycord.model.Server;
+import fr.isep.studycord.model.User;
+import fr.isep.studycord.repository.ServerRepository;
+import fr.isep.studycord.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+
+/**
+ * Service layer for user management.
+ *
+ * Handles user registration, lookup, and server membership operations.
+ */
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -17,20 +23,57 @@ public class UserService {
     private final UserRepository userRepository;
     private final ServerRepository serverRepository;
 
+    /**
+     * Creates and persists a new user from the provided DTO.
+     *
+     * @param dto the user data (username, email, role, school)
+     * @return the saved {@link User} with its generated ID
+     */
     public User createUser(UserDTO dto) {
         User user = new User(null, dto.getUsername(), dto.getEmail(), dto.getRole(), dto.getSchool(), null);
         return userRepository.save(user);
     }
 
+    /**
+     * Retrieves a user by their unique username.
+     *
+     * @param username the username to search for
+     * @return the matching {@link User}
+     * @throws RuntimeException if no user with the given username exists
+     */
     public User getUserByUsername(String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found: " + username));
     }
 
+    /**
+     * Returns all users stored in the database.
+     *
+     * @return a list of all {@link User} objects (never {@code null})
+     */
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
+    /**
+     * Returns all users who are members of the specified server.
+     *
+     * @param serverId the ID of the server whose members should be retrieved
+     * @return a list of {@link User} objects (never {@code null})
+     * @throws RuntimeException if no server with {@code serverId} exists
+     */
+    public List<User> getUsersByServerId(Long serverId) {
+        return userRepository.findByServerId(serverId);
+    }
+
+    /**
+     * Adds the specified server to the user's membership list.
+     *
+     * @param userId the ID of the user who wants to join
+     * @param serverId the ID of the server to join
+     * @return the updated {@link User} with the new server membership persisted
+     * @throws RuntimeException if the user or server does not exist
+     */
     public User joinServer(Long userId, Long serverId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found: " + userId));

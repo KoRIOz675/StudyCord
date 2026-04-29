@@ -16,6 +16,9 @@ import fr.isep.studycord.model.Channel;
 import fr.isep.studycord.service.ChannelService;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * REST controller exposing channel endpoints under {@code /api/channels}.
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/channels")
@@ -23,11 +26,29 @@ public class ChannelController {
 
     private final ChannelService channelService;
 
+    /**
+     * Creates a new channel inside the specified server.
+     *
+     * HTTP {@code POST /api/channels/{serverId}}
+     *
+     * @param serverId the ID of the server that will own the new channel
+     * @param dto the channel payload (name, topic)
+     * @return {@code 201 Created} with the persisted {@link Channel} in the
+     * body
+     */
     @PostMapping("/{serverId}")
     public ResponseEntity<Channel> createChannel(@PathVariable Long serverId, @RequestBody ChannelDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(channelService.createChannel(serverId, dto));
     }
 
+    /**
+     * Returns all channels that belong to the specified server.
+     *
+     * HTTP {@code GET /api/channels/server/{serverId}}
+     *
+     * @param serverId the ID of the server whose channels should be listed
+     * @return {@code 200 OK} with a list of {@link Channel} objects
+     */
     @GetMapping("/server/{serverId}")
     public ResponseEntity<List<Channel>> getChannelsByServerId(@PathVariable Long serverId) {
         return ResponseEntity.ok(channelService.getChannelsByServerId(serverId));
