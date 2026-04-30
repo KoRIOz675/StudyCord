@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import fr.isep.studycord.dto.MessageDTO;
 import fr.isep.studycord.model.Channel;
 import fr.isep.studycord.model.Message;
-import fr.isep.studycord.model.User;
 import fr.isep.studycord.repository.ChannelRepository;
 import fr.isep.studycord.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,16 +20,13 @@ public class MessageService {
     private final UserRepository userRepository;
 
     public Message postMessage(Long channelId, MessageDTO dto) {
-        Channel channel = channelRepository.findByIdWithMessages(channelId)
-                .orElseThrow(() -> new RuntimeException("Channel not found: " + channelId));
-
-        User author = userRepository.findById(dto.getAuthorId())
-                .orElseThrow(() -> new RuntimeException("User not found: " + dto.getAuthorId()));
-
-        Message message = new Message(null, dto.getContent(), LocalDateTime.now(), author);
-        channel.getMessages().add(message);
-        channelRepository.save(channel);
-        return message;
+        if (!channelRepository.existsById(channelId)) {
+            throw new RuntimeException("Channel not found: " + channelId);
+        }
+        if (!userRepository.existsById(dto.getAuthorId())) {
+            throw new RuntimeException("User not found: " + dto.getAuthorId());
+        }
+        return channelRepository.createMessage(channelId, dto.getAuthorId(), dto.getContent(), LocalDateTime.now());
     }
 
     public List<Message> getMessagesByChannel(Long channelId) {

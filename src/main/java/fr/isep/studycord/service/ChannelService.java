@@ -1,12 +1,11 @@
 package fr.isep.studycord.service;
 
-import java.util.ArrayList;
-
 import org.springframework.stereotype.Service;
 
 import fr.isep.studycord.dto.ChannelDTO;
 import fr.isep.studycord.model.Channel;
 import fr.isep.studycord.model.Server;
+import fr.isep.studycord.repository.ChannelRepository;
 import fr.isep.studycord.repository.ServerRepository;
 import lombok.RequiredArgsConstructor;
 
@@ -21,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 public class ChannelService {
 
     private final ServerRepository serverRepository;
+    private final ChannelRepository channelRepository;
 
     /**
      * Creates a new channel and attaches it to the specified server.
@@ -31,13 +31,10 @@ public class ChannelService {
      * @throws RuntimeException if no server with {@code serverId} exists
      */
     public Channel createChannel(Long serverId, ChannelDTO dto) {
-        Server server = serverRepository.findById(serverId)
-                .orElseThrow(() -> new RuntimeException("Server not found: " + serverId));
-
-        Channel channel = new Channel(null, dto.getName(), dto.getTopic(), new ArrayList<>());
-        server.getChannels().add(channel);
-        serverRepository.save(server);
-        return channel;
+        if (!serverRepository.existsById(serverId)) {
+            throw new RuntimeException("Server not found: " + serverId);
+        }
+        return channelRepository.createInServer(serverId, dto.getName(), dto.getTopic());
     }
 
     /**

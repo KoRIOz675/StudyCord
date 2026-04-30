@@ -22,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CosineSimService {
 
-    private static final double SIMILARITY_THRESHOLD = 0.2;
+    private static final double SIMILARITY_THRESHOLD = 0.5;
     private static final Pattern TOKEN_PATTERN = Pattern.compile("\\p{L}+[\\p{L}\\p{N}_-]*");
     private static final Set<String> STOP_WORDS = Set.of(
             "a", "an", "the", "is", "it", "in", "on", "at", "to",

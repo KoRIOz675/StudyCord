@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import fr.isep.studycord.dto.UserDTO;
+import fr.isep.studycord.model.Server;
 import fr.isep.studycord.model.User;
 import fr.isep.studycord.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -76,5 +77,18 @@ public class UserController {
     @PostMapping("/{userId}/join/{serverId}")
     public ResponseEntity<User> joinServer(@PathVariable Long userId, @PathVariable Long serverId) {
         return ResponseEntity.ok(userService.joinServer(userId, serverId));
+    }
+
+    /**
+     * Returns all servers that the user is a member of.
+     *
+     * HTTP {@code GET /api/users/{userId}/servers}
+     *
+     * @param userId the ID of the user whose servers to retrieve
+     * @return {@code 200 OK} with a list of {@link Server} objects
+     */
+    @GetMapping("/{userId}/servers")
+    public ResponseEntity<List<Server>> getServersByUser(@PathVariable Long userId) {
+        return ResponseEntity.ok(userService.getServersByUserId(userId));
     }
 }

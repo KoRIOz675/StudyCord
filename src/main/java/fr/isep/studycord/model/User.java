@@ -9,6 +9,8 @@ import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;
 import static org.springframework.data.neo4j.core.schema.Relationship.Direction.OUTGOING;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -56,6 +58,7 @@ public class User {
      * Servers the user has joined, stored as outgoing {@code MEMBER_OF}
      * relationships.
      */
+    @JsonIgnore
     @Relationship(type = "MEMBER_OF", direction = OUTGOING)
     private List<Server> servers = new ArrayList<>();
 

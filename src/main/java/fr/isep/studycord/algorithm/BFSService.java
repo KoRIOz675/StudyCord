@@ -41,8 +41,12 @@ public class BFSService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found: " + userId));
 
-        Queue<Server> queue = new java.util.LinkedList<>(user.getServers());
-        Set<Server> visited = new HashSet<>(user.getServers());
+        Set<Long> visitedIds = new HashSet<>();
+        Queue<Server> queue = new java.util.LinkedList<>();
+        for (Server s : user.getServers()) {
+            visitedIds.add(s.getId());
+            queue.add(s);
+        }
         List<Server> suggestions = new ArrayList<>();
 
         while (!queue.isEmpty()) {
@@ -53,8 +57,8 @@ public class BFSService {
             for (User member : members) {
                 if (!member.getId().equals(userId)) {
                     for (Server memberServer : member.getServers()) {
-                        if (!visited.contains(memberServer)) {
-                            visited.add(memberServer);
+                        if (!visitedIds.contains(memberServer.getId())) {
+                            visitedIds.add(memberServer.getId());
                             suggestions.add(memberServer);
                             queue.add(memberServer);
                         }

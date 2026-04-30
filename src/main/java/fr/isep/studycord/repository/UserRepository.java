@@ -5,7 +5,9 @@ import java.util.Optional;
 
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import fr.isep.studycord.model.User;
 
@@ -37,4 +39,16 @@ public interface UserRepository extends Neo4jRepository<User, Long> {
             + "MATCH (u)-[r2:MEMBER_OF]->(s2:Server) "
             + "RETURN u, collect(r2), collect(s2)")
     List<User> findByServerId(Long serverId);
+
+    /**
+     * Creates a MEMBER_OF relationship between a user and a server.
+     *
+     * @param userId the ID of the user
+     * @param serverId the ID of the server
+     */
+    @Transactional
+    @Query("MATCH (u:User) WHERE id(u) = $userId "
+            + "MATCH (s:Server) WHERE id(s) = $serverId "
+            + "CREATE (u)-[:MEMBER_OF]->(s)")
+    void createMembershipRelationship(@Param("userId") Long userId, @Param("serverId") Long serverId);
 }
