@@ -18,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/algorithms")
 @RequiredArgsConstructor
-public class BFSController {
+public class AlgoController {
 
     private final BFSService bfsService;
 
