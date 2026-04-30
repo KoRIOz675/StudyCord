@@ -6,9 +6,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import fr.isep.studycord.algorithm.BFSService;
+import fr.isep.studycord.algorithm.CosineSimService;
+import fr.isep.studycord.model.Message;
 import fr.isep.studycord.model.Server;
 import lombok.RequiredArgsConstructor;
 
@@ -21,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 public class AlgoController {
 
     private final BFSService bfsService;
+    private final CosineSimService cosineSimService;
 
     /**
      * Suggests servers for a user.
@@ -36,4 +40,12 @@ public class AlgoController {
     public ResponseEntity<List<Server>> suggestServers(@PathVariable Long userId) {
         return ResponseEntity.ok(bfsService.suggestServers(userId));
     }
+
+    @GetMapping("/similar-messages/{channelId}")
+    public ResponseEntity<List<Message>> findSimilarMessages(
+            @PathVariable Long channelId,
+            @RequestParam String query) {
+        return ResponseEntity.ok(cosineSimService.findSimilarMessages(channelId, query));
+    }
+
 }
