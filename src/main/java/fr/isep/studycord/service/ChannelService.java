@@ -1,11 +1,14 @@
 package fr.isep.studycord.service;
 
+import java.util.ArrayList;
+
+import org.springframework.stereotype.Service;
+
 import fr.isep.studycord.dto.ChannelDTO;
 import fr.isep.studycord.model.Channel;
 import fr.isep.studycord.model.Server;
 import fr.isep.studycord.repository.ServerRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 /**
  * Service layer for channel management.
@@ -31,7 +34,7 @@ public class ChannelService {
         Server server = serverRepository.findById(serverId)
                 .orElseThrow(() -> new RuntimeException("Server not found: " + serverId));
 
-        Channel channel = new Channel(null, dto.getName(), dto.getTopic());
+        Channel channel = new Channel(null, dto.getName(), dto.getTopic(), new ArrayList<>());
         server.getChannels().add(channel);
         serverRepository.save(server);
         return channel;
