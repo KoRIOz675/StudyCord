@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import fr.isep.studycord.dto.UserDTO;
 import fr.isep.studycord.model.Server;
 import fr.isep.studycord.model.User;
-import fr.isep.studycord.repository.ServerRepository;
 import fr.isep.studycord.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 
@@ -22,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final ServerRepository serverRepository;
+    // private final ServerRepository serverRepository;
 
     /**
      * Creates and persists a new user from the provided DTO.
@@ -80,10 +79,10 @@ public class UserService {
      * @throws RuntimeException if the user or server does not exist
      */
     public User joinServer(Long userId, Long serverId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
-        Server server = serverRepository.findById(serverId)
-                .orElseThrow(() -> new RuntimeException("Server not found: " + serverId));
+        // User user = userRepository.findById(userId)
+        //         .orElseThrow(() -> new RuntimeException("User not found: " + userId));
+        // Server server = serverRepository.findById(serverId)
+        //         .orElseThrow(() -> new RuntimeException("Server not found: " + serverId));
 
         // Create the MEMBER_OF relationship explicitly in Neo4j
         userRepository.createMembershipRelationship(userId, serverId);

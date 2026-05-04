@@ -61,7 +61,6 @@ docker-compose up -d
 ### 4. Initialize sample data
 
 ```bash
-chmod +x init-data.sh
 ./init-data.sh
 ```
 
