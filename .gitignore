@@ -5,6 +5,8 @@ target/
 !**/src/test/**/target/
 .env
 .claude
+CLAUDE.md
+project/
 
 ### STS ###
 .apt_generated
@@ -36,3 +38,6 @@ build/
 
 ### Neo4j ###
 neo4j/
+
+### CodeGraph ###
+.codegraph/
