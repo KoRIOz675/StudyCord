@@ -38,7 +38,7 @@ public class BFSService {
      * @throws RuntimeException if no user with {@code userId} exists
      */
     public List<Server> suggestServers(Long userId) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdWithServers(userId)
                 .orElseThrow(() -> new RuntimeException("User not found: " + userId));
 
         Set<Long> visitedIds = new HashSet<>();

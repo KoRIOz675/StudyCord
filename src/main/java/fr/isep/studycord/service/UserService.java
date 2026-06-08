@@ -2,7 +2,9 @@ package fr.isep.studycord.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import org.springframework.data.neo4j.core.Neo4jClient;
 import org.springframework.stereotype.Service;
 
 import fr.isep.studycord.dto.UserDTO;
@@ -21,7 +23,7 @@ import lombok.RequiredArgsConstructor;
 public class UserService {
 
     private final UserRepository userRepository;
-    // private final ServerRepository serverRepository;
+    private final Neo4jClient neo4jClient;
 
     /**
      * Creates and persists a new user from the provided DTO.
@@ -79,16 +81,14 @@ public class UserService {
      * @throws RuntimeException if the user or server does not exist
      */
     public User joinServer(Long userId, Long serverId) {
-        // User user = userRepository.findById(userId)
-        //         .orElseThrow(() -> new RuntimeException("User not found: " + userId));
-        // Server server = serverRepository.findById(serverId)
-        //         .orElseThrow(() -> new RuntimeException("Server not found: " + serverId));
-
-        // Create the MEMBER_OF relationship explicitly in Neo4j
-        userRepository.createMembershipRelationship(userId, serverId);
-
-        // Return the user with updated relationships
-        return userRepository.findById(userId).get();
+        neo4jClient
+                .query("MATCH (u:User) WHERE id(u) = $userId "
+                        + "MATCH (s:Server) WHERE id(s) = $serverId "
+                        + "MERGE (u)-[:MEMBER_OF]->(s)")
+                .bindAll(Map.of("userId", userId, "serverId", serverId))
+                .run();
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
     }
 
     /**
@@ -99,7 +99,7 @@ public class UserService {
      * @throws RuntimeException if no user with {@code userId} exists
      */
     public List<Server> getServersByUserId(Long userId) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdWithServers(userId)
                 .orElseThrow(() -> new RuntimeException("User not found: " + userId));
         return new ArrayList<>(user.getServers());
     }

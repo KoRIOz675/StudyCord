@@ -12,6 +12,9 @@ import fr.isep.studycord.model.Message;
 @Repository
 public interface MessageRepository extends Neo4jRepository<Message, Long> {
 
+    @Query("MATCH (c:Channel)-[:HAS_MESSAGE]->(m:Message) WHERE id(c) = $channelId RETURN m")
+    List<Message> findByChannelId(@Param("channelId") Long channelId);
+
     @Query("MATCH (c:Channel) WHERE id(c) = $channelId "
             + "MATCH (c)-[:HAS_MESSAGE]->(m:Message)-[rc:CONTAINS]->(w:Word) "
             + "WHERE w.value IN $words "

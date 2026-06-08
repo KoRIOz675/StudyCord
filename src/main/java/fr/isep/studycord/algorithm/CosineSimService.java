@@ -4,16 +4,13 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.springframework.data.neo4j.core.Neo4jClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import fr.isep.studycord.model.Channel;
 import fr.isep.studycord.model.Message;
-import fr.isep.studycord.model.MessageWord;
-import fr.isep.studycord.model.Word;
 import fr.isep.studycord.repository.ChannelRepository;
 import fr.isep.studycord.repository.MessageRepository;
-import fr.isep.studycord.repository.WordRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -34,7 +31,7 @@ public class CosineSimService {
 
     private final ChannelRepository channelRepository;
     private final MessageRepository messageRepository;
-    private final WordRepository wordRepository;
+    private final Neo4jClient neo4jClient;
 
     // -------------------------------------------------------------------------
     // Batch reindex — single pass over all messages in a channel
@@ -42,11 +39,11 @@ public class CosineSimService {
 
     @Transactional
     public void reindexChannel(Long channelId) {
-        Channel channel = channelRepository.findByIdWithMessages(channelId)
-                .orElseThrow(() -> new RuntimeException("Channel not found: " + channelId));
+        if (!channelRepository.existsById(channelId)) {
+            throw new RuntimeException("Channel not found: " + channelId);
+        }
 
-        List<Message> allMessages = Optional.ofNullable(channel.getMessages())
-                .orElseGet(ArrayList::new);
+        List<Message> allMessages = messageRepository.findByChannelId(channelId);
 
         if (allMessages.isEmpty())
             return;
@@ -82,19 +79,22 @@ public class CosineSimService {
     // -------------------------------------------------------------------------
 
     private void persistWordRelationships(Message message, Map<String, Double> tfidf) {
-        List<MessageWord> wordRels = new ArrayList<>();
+        Long msgId = message.getId();
+
+        // Remove stale CONTAINS relationships — no entity cascade, no User touch
+        neo4jClient
+                .query("MATCH (m:Message)-[r:CONTAINS]->() WHERE id(m) = $id DELETE r")
+                .bindAll(Map.of("id", msgId))
+                .run();
+
         for (Map.Entry<String, Double> entry : tfidf.entrySet()) {
-            String wordValue = entry.getKey();
-            double score = entry.getValue();
-
-            // Reuse existing Word node or create a new one
-            Word word = wordRepository.findByValue(wordValue)
-                    .orElseGet(() -> wordRepository.save(new Word(null, wordValue)));
-
-            wordRels.add(new MessageWord(null, score, word));
+            neo4jClient
+                    .query("MERGE (w:Word {value: $word}) "
+                            + "WITH w MATCH (m:Message) WHERE id(m) = $id "
+                            + "MERGE (m)-[r:CONTAINS]->(w) SET r.tfidf = $score")
+                    .bindAll(Map.of("word", entry.getKey(), "id", msgId, "score", entry.getValue()))
+                    .run();
         }
-        message.setWords(wordRels);
-        messageRepository.save(message);
     }
 
     // -------------------------------------------------------------------------
