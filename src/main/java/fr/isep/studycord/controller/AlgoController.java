@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import fr.isep.studycord.algorithm.BFSService;
 import fr.isep.studycord.algorithm.CosineSimService;
+import fr.isep.studycord.algorithm.IsolationDetectionService;
+import fr.isep.studycord.dto.UserActivityVector;
 import fr.isep.studycord.model.Message;
 import fr.isep.studycord.model.Server;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,7 @@ public class AlgoController {
 
     private final BFSService bfsService;
     private final CosineSimService cosineSimService;
+    private final IsolationDetectionService isolationDetectionService;
 
     /**
      * Suggests servers for a user.
@@ -46,6 +49,20 @@ public class AlgoController {
             @PathVariable Long channelId,
             @RequestParam String query) {
         return ResponseEntity.ok(cosineSimService.findSimilarMessages(channelId, query));
+    }
+
+    /**
+     * Detects isolated students with a simplified DBSCAN.
+     * {@code GET /api/algorithms/isolated-users} ({@code eps}/{@code minPts} optional).
+     */
+    @GetMapping("/isolated-users")
+    public ResponseEntity<List<UserActivityVector>> findIsolatedUsers(
+            @RequestParam(required = false) Double eps,
+            @RequestParam(required = false) Integer minPts) {
+        if (eps != null && minPts != null) {
+            return ResponseEntity.ok(isolationDetectionService.findIsolatedUsers(eps, minPts));
+        }
+        return ResponseEntity.ok(isolationDetectionService.findIsolatedUsers());
     }
 
 }

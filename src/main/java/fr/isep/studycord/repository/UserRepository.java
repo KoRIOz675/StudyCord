@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import fr.isep.studycord.dto.UserActivityVector;
 import fr.isep.studycord.model.User;
 
 /**
@@ -19,6 +20,24 @@ import fr.isep.studycord.model.User;
  */
 @Repository
 public interface UserRepository extends Neo4jRepository<User, Long> {
+
+    /**
+     * One activity vector per student (STUDENT only). OPTIONAL MATCH keeps
+     * students with no server/message so isolated ones are included.
+     *
+     * @return one {@link UserActivityVector} per student
+     */
+    @Query("MATCH (u:User) WHERE u.role = 'STUDENT' "
+            + "OPTIONAL MATCH (u)-[:MEMBER_OF]->(s:Server) "
+            + "WITH u, count(DISTINCT s) AS serverCount "
+            + "OPTIONAL MATCH (m:Message)-[:POSTED_BY]->(u) "
+            + "OPTIONAL MATCH (c:Channel)-[:HAS_MESSAGE]->(m) "
+            + "RETURN id(u) AS userId, "
+            + "       u.username AS username, "
+            + "       count(DISTINCT m) AS totalMessages, "
+            + "       serverCount AS serverCount, "
+            + "       count(DISTINCT c) AS activeChannelCount")
+    List<UserActivityVector> computeStudentActivityVectors();
 
     /**
      * Finds a user by their unique username.
@@ -49,6 +68,6 @@ public interface UserRepository extends Neo4jRepository<User, Long> {
     @Transactional
     @Query("MATCH (u:User) WHERE id(u) = $userId "
             + "MATCH (s:Server) WHERE id(s) = $serverId "
-            + "CREATE (u)-[:MEMBER_OF]->(s)")
+            + "MERGE (u)-[:MEMBER_OF]->(s)")
     void createMembershipRelationship(@Param("userId") Long userId, @Param("serverId") Long serverId);
 }

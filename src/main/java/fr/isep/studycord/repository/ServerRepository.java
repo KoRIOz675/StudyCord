@@ -4,8 +4,11 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.neo4j.repository.Neo4jRepository;
+import org.springframework.data.neo4j.repository.query.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import fr.isep.studycord.dto.RecommendedServerDto;
 import fr.isep.studycord.model.Server;
 
 /**
@@ -32,4 +35,27 @@ public interface ServerRepository extends Neo4jRepository<Server, Long> {
      * @return a list of matching servers (never {@code null})
      */
     List<Server> findAllBySchool(String school);
+
+    /**
+     * Most active servers the user has not joined yet, ranked by message count
+     * then member count.
+     *
+     * @param userId the student for whom suggestions are computed
+     * @param limit  maximum number of servers to return
+     */
+    @Query("MATCH (target:User) WHERE id(target) = $userId "
+            + "MATCH (s:Server) WHERE NOT (target)-[:MEMBER_OF]->(s) "
+            + "OPTIONAL MATCH (member:User)-[:MEMBER_OF]->(s) "
+            + "OPTIONAL MATCH (s)-[:HAS_CHANNEL]->(c:Channel) "
+            + "OPTIONAL MATCH (c)-[:HAS_MESSAGE]->(m:Message) "
+            + "RETURN id(s) AS serverId, "
+            + "       s.name AS serverName, "
+            + "       s.subject AS subject, "
+            + "       s.school AS school, "
+            + "       count(DISTINCT member) AS memberCount, "
+            + "       count(DISTINCT m) AS messageCount "
+            + "ORDER BY messageCount DESC, memberCount DESC "
+            + "LIMIT $limit")
+    List<RecommendedServerDto> findPopularServersNotJoined(
+            @Param("userId") Long userId, @Param("limit") int limit);
 }
