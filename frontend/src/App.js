@@ -4,6 +4,7 @@ import ServerList from "./components/ServerList";
 import ChannelList from "./components/ChannelList";
 import MessageFeed from "./components/MessageFeed";
 import Suggestions from "./components/Suggestions";
+import IntegrationOverlay from "./components/IntegrationOverlay";
 import "./App.css";
 
 function App() {
@@ -11,6 +12,7 @@ function App() {
   const [selectedServer, setSelectedServer] = useState(null);
   const [selectedChannel, setSelectedChannel] = useState(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [serverRefresh, setServerRefresh] = useState(0);
 
   if (!currentUser) {
     return <Login onLogin={setCurrentUser} />;
@@ -25,6 +27,15 @@ function App() {
         color: "white",
       }}
     >
+      <IntegrationOverlay
+        userId={currentUser.id}
+        onJoin={(server) => {
+          setSelectedServer({ id: server.serverId, name: server.serverName });
+          setSelectedChannel(null);
+          setServerRefresh((n) => n + 1);
+        }}
+      />
+
       {/* Sidebar servers */}
       <div
         style={{
@@ -39,6 +50,7 @@ function App() {
       >
         <ServerList
           userId={currentUser.id}
+          refreshKey={serverRefresh}
           onSelect={(server) => {
             setSelectedServer(server);
             setSelectedChannel(null);

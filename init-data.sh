@@ -403,3 +403,8 @@ echo "  Phys   #thermodynamics  ID=$PHYS_THERMO_ID    -> query: 'entropy thermod
 echo "  Phys   #mechanics       ID=$PHYS_MECH_ID      -> query: 'Newton force'"
 echo "  Chem   #organic         ID=$CHEM_ORGANIC_ID   -> query: 'SN1 reaction'"
 echo "  Eng    #essays          ID=$ENG_ESSAYS_ID     -> query: 'argumentative essay'"
+echo ""
+echo "Isolated users / DBSCAN test:"
+echo "  curl \"$BASE_URL/api/algorithms/isolated-users\""
+echo "  curl \"$BASE_URL/api/algorithms/isolated-users?eps=0.4&minPts=3\""
+echo "  curl \"$BASE_URL/api/algorithms/isolated-users?eps=0.2&minPts=3\""
