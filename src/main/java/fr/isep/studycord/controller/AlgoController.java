@@ -50,9 +50,9 @@ public class AlgoController {
     }
 
     @PostMapping("/reindex-channel/{channelId}")
-    public ResponseEntity<String> reindexChannel(@PathVariable Long channelId) {
+    public ResponseEntity<Void> reindexChannel(@PathVariable Long channelId) {
         cosineSimService.reindexChannel(channelId);
-        return ResponseEntity.ok("Reindexed channel " + channelId);
+        return ResponseEntity.accepted().build();
     }
 
 }

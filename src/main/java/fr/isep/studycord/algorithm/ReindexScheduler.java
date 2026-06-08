@@ -20,14 +20,13 @@ public class ReindexScheduler {
     @Scheduled(cron = "0 0 0 * * *")
     public void reindexAllChannels() {
         List<Long> channelIds = channelRepository.findAllIds();
-        log.info("Scheduled reindex started for {} channels", channelIds.size());
+        log.info("Scheduled reindex dispatching {} channels", channelIds.size());
         for (Long id : channelIds) {
-            try {
-                cosineSimService.reindexChannel(id);
-            } catch (Exception e) {
-                log.warn("Reindex failed for channel {}: {}", id, e.getMessage());
-            }
+            cosineSimService.reindexChannel(id)
+                    .exceptionally(e -> {
+                        log.warn("Reindex failed for channel {}: {}", id, e.getMessage());
+                        return null;
+                    });
         }
-        log.info("Scheduled reindex completed");
     }
 }

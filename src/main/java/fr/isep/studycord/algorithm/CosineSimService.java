@@ -1,10 +1,12 @@
 package fr.isep.studycord.algorithm;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.data.neo4j.core.Neo4jClient;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,8 +39,9 @@ public class CosineSimService {
     // Batch reindex — single pass over all messages in a channel
     // -------------------------------------------------------------------------
 
+    @Async("reindexExecutor")
     @Transactional
-    public void reindexChannel(Long channelId) {
+    public CompletableFuture<Void> reindexChannel(Long channelId) {
         if (!channelRepository.existsById(channelId)) {
             throw new RuntimeException("Channel not found: " + channelId);
         }
@@ -46,7 +49,7 @@ public class CosineSimService {
         List<Message> allMessages = messageRepository.findByChannelId(channelId);
 
         if (allMessages.isEmpty())
-            return;
+            return CompletableFuture.completedFuture(null);
 
         int totalDocs = allMessages.size();
 
@@ -61,6 +64,8 @@ public class CosineSimService {
             Map<String, Double> tfidf = buildTFIDF(allTFs.get(i), idf);
             persistWordRelationships(allMessages.get(i), tfidf);
         }
+
+        return CompletableFuture.completedFuture(null);
     }
 
     // -------------------------------------------------------------------------
