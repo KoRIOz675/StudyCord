@@ -52,9 +52,21 @@ USER3=$(curl -s -X POST "$BASE_URL/api/users" \
 USER3_ID=$(extract_id "$USER3")
 echo "User 3 created: ID=$USER3_ID"
 
+USER4=$(curl -s -X POST "$BASE_URL/api/users" \
+  -H "Content-Type: application/json" \
+  -d '{"username": "david", "email": "david@isep.fr", "role": "STUDENT", "school": "ISEP"}')
+USER4_ID=$(extract_id "$USER4")
+echo "User 4 created: ID=$USER4_ID (isolated: joins no server)"
+
+USER5=$(curl -s -X POST "$BASE_URL/api/users" \
+  -H "Content-Type: application/json" \
+  -d '{"username": "emma", "email": "emma@isep.fr", "role": "STUDENT", "school": "ISEP"}')
+USER5_ID=$(extract_id "$USER5")
+echo "User 5 created: ID=$USER5_ID (low activity: joins one server, no messages)"
+
 echo ""
 echo "=== Joining Servers ==="
-echo "Debug: USER1_ID=$USER1_ID, USER2_ID=$USER2_ID, USER3_ID=$USER3_ID"
+echo "Debug: USER1_ID=$USER1_ID, USER2_ID=$USER2_ID, USER3_ID=$USER3_ID, USER4_ID=$USER4_ID, USER5_ID=$USER5_ID"
 echo "Debug: SERVER1_ID=$SERVER1_ID, SERVER2_ID=$SERVER2_ID, SERVER3_ID=$SERVER3_ID"
 
 echo ""
@@ -82,10 +94,13 @@ echo "Charlie joining Physics Server (user=$USER3_ID, server=$SERVER3_ID):"
 curl -s -X POST "$BASE_URL/api/users/$USER3_ID/join/$SERVER3_ID"
 echo ""
 
+echo "Emma joining Maths Server (user=$USER5_ID, server=$SERVER1_ID):"
+curl -s -X POST "$BASE_URL/api/users/$USER5_ID/join/$SERVER1_ID"
+echo ""
+
 echo ""
 echo "=== Creating Channels ==="
 
-# Maths Server channels
 CH1=$(curl -s -X POST "$BASE_URL/api/channels/$SERVER1_ID" \
   -H "Content-Type: application/json" \
   -d '{"name": "general", "topic": "General discussion"}')
@@ -98,7 +113,6 @@ CH2=$(curl -s -X POST "$BASE_URL/api/channels/$SERVER1_ID" \
 CH2_ID=$(extract_id "$CH2")
 echo "Channel 'homework-help' created in Maths Server: ID=$CH2_ID"
 
-# Algo Server channels
 CH3=$(curl -s -X POST "$BASE_URL/api/channels/$SERVER2_ID" \
   -H "Content-Type: application/json" \
   -d '{"name": "general", "topic": "General discussion"}')
@@ -111,7 +125,6 @@ CH4=$(curl -s -X POST "$BASE_URL/api/channels/$SERVER2_ID" \
 CH4_ID=$(extract_id "$CH4")
 echo "Channel 'sorting-algorithms' created in Algo Server: ID=$CH4_ID"
 
-# Physics Server channels
 CH5=$(curl -s -X POST "$BASE_URL/api/channels/$SERVER3_ID" \
   -H "Content-Type: application/json" \
   -d '{"name": "general", "topic": "General discussion"}')
@@ -121,7 +134,6 @@ echo "Channel 'general' created in Physics Server: ID=$CH5_ID"
 echo ""
 echo "=== Posting Messages ==="
 
-# Messages in Maths homework-help channel
 curl -s -X POST "$BASE_URL/api/messages/$CH2_ID" \
   -H "Content-Type: application/json" \
   -d "{\"content\": \"How do I solve a second degree equation?\", \"authorId\": $USER1_ID}" > /dev/null
@@ -130,14 +142,13 @@ echo "Alice posted in Maths homework-help"
 curl -s -X POST "$BASE_URL/api/messages/$CH2_ID" \
   -H "Content-Type: application/json" \
   -d "{\"content\": \"Can someone explain how to solve quadratic equations?\", \"authorId\": $USER2_ID}" > /dev/null
-echo "Bob posted in Maths homework-help (similar to Alice's)"
+echo "Bob posted in Maths homework-help"
 
 curl -s -X POST "$BASE_URL/api/messages/$CH2_ID" \
   -H "Content-Type: application/json" \
   -d "{\"content\": \"Use the discriminant: b^2 - 4ac to solve any quadratic equation.\", \"authorId\": $USER3_ID}" > /dev/null
 echo "Charlie posted answer in Maths homework-help"
 
-# Messages in Algo sorting channel
 curl -s -X POST "$BASE_URL/api/messages/$CH4_ID" \
   -H "Content-Type: application/json" \
   -d "{\"content\": \"What is the time complexity of quicksort?\", \"authorId\": $USER1_ID}" > /dev/null
@@ -146,21 +157,36 @@ echo "Alice posted in Algo sorting-algorithms"
 curl -s -X POST "$BASE_URL/api/messages/$CH4_ID" \
   -H "Content-Type: application/json" \
   -d "{\"content\": \"What is the complexity of merge sort vs quicksort?\", \"authorId\": $USER3_ID}" > /dev/null
-echo "Charlie posted in Algo sorting-algorithms (similar to Alice's)"
+echo "Charlie posted in Algo sorting-algorithms"
 
-# Messages in Physics general channel
 curl -s -X POST "$BASE_URL/api/messages/$CH5_ID" \
   -H "Content-Type: application/json" \
   -d "{\"content\": \"Does anyone have the lecture notes for thermodynamics?\", \"authorId\": $USER2_ID}" > /dev/null
 echo "Bob posted in Physics general"
 
 echo ""
-echo "=== Done! ==="
-echo "Expected BFS results:"
-echo "  Alice  (ID=$USER1_ID) -> should suggest: Physics Server"
-echo "  Bob    (ID=$USER2_ID) -> should suggest: Algo Server"
-echo "  Charlie(ID=$USER3_ID) -> should suggest: Maths Server"
+echo "=== Testing Algorithms ==="
+
 echo ""
-echo "Cosine Similarity test (similar messages in Maths homework-help):"
+echo "Expected BFS results:"
+echo "  Alice   (ID=$USER1_ID) -> should suggest: Physics Server"
+echo "  Bob     (ID=$USER2_ID) -> should suggest: Algo Server"
+echo "  Charlie (ID=$USER3_ID) -> should suggest: Maths Server"
+
+echo ""
+echo "Cosine Similarity test:"
 echo "  Channel ID=$CH2_ID contains similar questions about quadratic equations"
 echo "  Channel ID=$CH4_ID contains similar questions about sorting complexity"
+
+echo ""
+echo "Isolated users test:"
+echo "  David   (ID=$USER4_ID) -> should be isolated: no server, no messages"
+echo "  Emma    (ID=$USER5_ID) -> may be isolated: one server, no messages"
+echo ""
+echo "Try:"
+echo "curl \"$BASE_URL/api/algorithms/isolated-users\""
+echo "curl \"$BASE_URL/api/algorithms/isolated-users?eps=0.4&minPts=3\""
+echo "curl \"$BASE_URL/api/algorithms/isolated-users?eps=0.2&minPts=3\""
+
+echo ""
+echo "=== Done! ==="

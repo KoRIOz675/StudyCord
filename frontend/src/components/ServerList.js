@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import { getServersByUser } from "../api/api";
 
-export default function ServerList({ userId, onSelect, selectedServer }) {
+export default function ServerList({ userId, onSelect, selectedServer, refreshKey }) {
   const [servers, setServers] = useState([]);
 
+  // Re-fetch when userId changes or refreshKey is bumped (e.g. after a join).
   useEffect(() => {
     getServersByUser(userId)
       .then((res) => setServers(res.data))
       .catch(console.error);
-  }, [userId]);
+  }, [userId, refreshKey]);
 
   return (
     <>

@@ -9,11 +9,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import fr.isep.studycord.dto.IntegrationSuggestionResponse;
 import fr.isep.studycord.dto.UserDTO;
 import fr.isep.studycord.model.Server;
 import fr.isep.studycord.model.User;
+import fr.isep.studycord.service.IntegrationSuggestionService;
 import fr.isep.studycord.service.UserService;
 import lombok.RequiredArgsConstructor;
 
@@ -26,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 public class UserController {
 
     private final UserService userService;
+    private final IntegrationSuggestionService integrationSuggestionService;
 
     /**
      * Registers a new user.
@@ -90,5 +94,22 @@ public class UserController {
     @GetMapping("/{userId}/servers")
     public ResponseEntity<List<Server>> getServersByUser(@PathVariable Long userId) {
         return ResponseEntity.ok(userService.getServersByUserId(userId));
+    }
+
+    /**
+     * Onboarding suggestions for a student: recommends active servers to join
+     * when the student is flagged isolated, otherwise returns an empty response.
+     * {@code GET /api/users/{userId}/integration-suggestions} ({@code eps}/{@code minPts} optional).
+     */
+    @GetMapping("/{userId}/integration-suggestions")
+    public ResponseEntity<IntegrationSuggestionResponse> getIntegrationSuggestions(
+            @PathVariable Long userId,
+            @RequestParam(required = false) Double eps,
+            @RequestParam(required = false) Integer minPts) {
+        if (eps != null && minPts != null) {
+            return ResponseEntity.ok(
+                    integrationSuggestionService.getSuggestions(userId, eps, minPts));
+        }
+        return ResponseEntity.ok(integrationSuggestionService.getSuggestions(userId));
     }
 }
