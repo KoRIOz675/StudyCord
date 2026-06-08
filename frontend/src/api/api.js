@@ -18,3 +18,5 @@ export const getSimilarMessages = (channelId, query) =>
 export const getUsers = () => axios.get(`${BASE_URL}/users`);
 export const getServersByUser = (userId) =>
   axios.get(`${BASE_URL}/users/${userId}/servers`);
+export const joinServer = (userId, serverId) =>
+  axios.post(`${BASE_URL}/users/${userId}/join/${serverId}`);

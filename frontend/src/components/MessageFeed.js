@@ -1,11 +1,9 @@
 import { useEffect, useState } from "react";
 import { getMessages, postMessage } from "../api/api";
-import Suggestions from "./Suggestions";
 
 export default function MessageFeed({ channel, currentUser }) {
   const [messages, setMessages] = useState([]);
   const [content, setContent] = useState("");
-  const [showSuggestions, setShowSuggestions] = useState(false);
   const authorId = currentUser.id;
 
   // APRÈS
@@ -45,26 +43,6 @@ export default function MessageFeed({ channel, currentUser }) {
         }}
       >
         <span># {channel.name}</span>
-        <button
-          onClick={() => setShowSuggestions((s) => !s)}
-          style={{
-            padding: "6px 12px",
-            borderRadius: "6px",
-            border: "none",
-            backgroundColor: "#5865f2",
-            color: "white",
-            cursor: "pointer",
-            fontSize: "12px",
-          }}
-        >
-          Suggestions
-        </button>
-        {showSuggestions && (
-          <Suggestions
-            userId={authorId}
-            onClose={() => setShowSuggestions(false)}
-          />
-        )}
       </div>
 
       {/* Messages */}
