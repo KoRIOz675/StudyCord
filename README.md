@@ -77,6 +77,8 @@ npm install
 npm start
 ```
 
+Frontend runs at `http://localhost:3000`.
+
 ### 5. Initialize sample data
 
 ```bash
@@ -84,6 +86,22 @@ npm start
 ```
 
 Seeds 5 servers, 6 users, 13 channels, ~35 messages with BFS-friendly memberships, then triggers a full reindex.
+
+---
+
+## Navigation
+
+The frontend is a single-page app — navigation is state-based, not URL-based.
+
+| View | How to reach it |
+|------|----------------|
+| **Login** | Shown automatically on load |
+| **Main layout** | After selecting a user in the login screen |
+| **Server list** | Icon sidebar on the left — always visible once logged in |
+| **Channel list** | Click a server in the sidebar |
+| **Message feed** | Click a channel in the channel list |
+| **Server suggestions** (BFS) | Click the 🔍 icon next to your username |
+| **Integration overlay** (DBSCAN) | Shown automatically if the user is detected as isolated |
 
 ---
 
