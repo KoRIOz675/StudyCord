@@ -26,7 +26,9 @@ public class MessageService {
         if (!userRepository.existsById(dto.getAuthorId())) {
             throw new RuntimeException("User not found: " + dto.getAuthorId());
         }
-        return channelRepository.createMessage(channelId, dto.getAuthorId(), dto.getContent(), LocalDateTime.now());
+
+        return channelRepository.createMessage(
+                channelId, dto.getAuthorId(), dto.getContent(), LocalDateTime.now());
     }
 
     public List<Message> getMessagesByChannel(Long channelId) {
@@ -34,5 +36,4 @@ public class MessageService {
                 .orElseThrow(() -> new RuntimeException("Channel not found: " + channelId));
         return channel.getMessages();
     }
-
 }

@@ -3,6 +3,7 @@ import Login from "./components/Login";
 import ServerList from "./components/ServerList";
 import ChannelList from "./components/ChannelList";
 import MessageFeed from "./components/MessageFeed";
+import Suggestions from "./components/Suggestions";
 import IntegrationOverlay from "./components/IntegrationOverlay";
 import "./App.css";
 
@@ -10,6 +11,7 @@ function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [selectedServer, setSelectedServer] = useState(null);
   const [selectedChannel, setSelectedChannel] = useState(null);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [serverRefresh, setServerRefresh] = useState(0);
 
   if (!currentUser) {
@@ -64,6 +66,7 @@ function App() {
           backgroundColor: "#2b2d31",
           display: "flex",
           flexDirection: "column",
+          position: "relative",
         }}
       >
         {/* Header user */}
@@ -73,15 +76,43 @@ function App() {
             borderBottom: "1px solid #1e1f22",
             fontSize: "13px",
             color: "#b5bac1",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
           }}
         >
-          <span style={{ fontWeight: "bold", color: "white" }}>
-            {currentUser.username}
-          </span>
-          <span style={{ marginLeft: "6px", fontSize: "11px" }}>
-            {currentUser.role}
-          </span>
+          <div>
+            <span style={{ fontWeight: "bold", color: "white" }}>
+              {currentUser.username}
+            </span>
+            <span style={{ marginLeft: "6px", fontSize: "11px" }}>
+              {currentUser.role}
+            </span>
+          </div>
+          <button
+            onClick={() => setShowSuggestions((s) => !s)}
+            title="Suggested servers"
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              color: showSuggestions ? "white" : "#6d6f78",
+              fontSize: "16px",
+              padding: "0",
+            }}
+          >
+            🔍
+          </button>
         </div>
+
+        {showSuggestions && (
+          <Suggestions
+            userId={currentUser.id}
+            onClose={() => setShowSuggestions(false)}
+            onJoined={() => window.location.reload()}
+          />
+        )}
+
         {selectedServer ? (
           <ChannelList
             server={selectedServer}

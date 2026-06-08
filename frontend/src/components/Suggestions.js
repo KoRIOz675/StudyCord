@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { getSuggestions } from "../api/api";
+import { getSuggestions, joinServer } from "../api/api";
 
-export default function Suggestions({ userId, onClose }) {
+export default function Suggestions({ userId, onClose, onJoined }) {
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [joining, setJoining] = useState(null); // serverId currently being joined
 
   useEffect(() => {
     getSuggestions(userId)
@@ -11,6 +12,17 @@ export default function Suggestions({ userId, onClose }) {
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [userId]);
+
+  const handleJoin = (server) => {
+    setJoining(server.id);
+    joinServer(userId, server.id)
+      .then(() => {
+        setSuggestions((prev) => prev.filter((s) => s.id !== server.id));
+        onJoined && onJoined();
+      })
+      .catch(console.error)
+      .finally(() => setJoining(null));
+  };
 
   return (
     <div
@@ -46,7 +58,7 @@ export default function Suggestions({ userId, onClose }) {
         </span>
       </div>
 
-      {/* Contenu */}
+      {/* Content */}
       {loading ? (
         <div style={{ color: "#6d6f78", fontSize: "13px" }}>Loading...</div>
       ) : suggestions.length === 0 ? (
@@ -62,16 +74,38 @@ export default function Suggestions({ userId, onClose }) {
               borderRadius: "6px",
               backgroundColor: "#35373c",
               marginBottom: "6px",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
             }}
           >
-            <div
-              style={{ color: "white", fontSize: "14px", fontWeight: "bold" }}
+            <div>
+              <div
+                style={{ color: "white", fontSize: "14px", fontWeight: "bold" }}
+              >
+                {server.name}
+              </div>
+              <div style={{ color: "#6d6f78", fontSize: "12px" }}>
+                {server.school}
+              </div>
+            </div>
+            <button
+              onClick={() => handleJoin(server)}
+              disabled={joining === server.id}
+              style={{
+                padding: "4px 10px",
+                borderRadius: "4px",
+                border: "none",
+                backgroundColor: joining === server.id ? "#4e5058" : "#5865f2",
+                color: "white",
+                cursor: joining === server.id ? "default" : "pointer",
+                fontSize: "12px",
+                fontWeight: "bold",
+                flexShrink: 0,
+              }}
             >
-              {server.name}
-            </div>
-            <div style={{ color: "#6d6f78", fontSize: "12px" }}>
-              {server.school}
-            </div>
+              {joining === server.id ? "..." : "Join"}
+            </button>
           </div>
         ))
       )}

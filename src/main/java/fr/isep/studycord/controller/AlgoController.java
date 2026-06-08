@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -36,7 +37,7 @@ public class AlgoController {
      *
      * @param userId the id of the user for whom to compute suggestions
      * @return a list of suggested {@link Server} instances ordered by discovery
-     * distance (closest first). Never {@code null}.
+     *         distance (closest first). Never {@code null}.
      * @throws RuntimeException if the user with the given id cannot be found
      */
     @GetMapping("/suggest-servers/{userId}")
@@ -49,6 +50,12 @@ public class AlgoController {
             @PathVariable Long channelId,
             @RequestParam String query) {
         return ResponseEntity.ok(cosineSimService.findSimilarMessages(channelId, query));
+    }
+
+    @PostMapping("/reindex-channel/{channelId}")
+    public ResponseEntity<Void> reindexChannel(@PathVariable Long channelId) {
+        cosineSimService.reindexChannel(channelId);
+        return ResponseEntity.accepted().build();
     }
 
     /**
