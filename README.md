@@ -15,7 +15,7 @@ StudyCord is a Discord-inspired platform designed for school collaboration.
 - **Docker** (Neo4j container)
 
 **Frontend**
-- **React 19** (single-page app)
+- **React** (single-page app)
 
 ---
 
